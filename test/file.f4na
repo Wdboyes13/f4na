@@ -1,0 +1,27 @@
+import error;
+
+let SYS_READ = 3;
+let SYS_WRITE = 4;
+let SYS_OPEN = 5;
+let SYS_CLOSE = 6;
+
+let O_CREAT = 0x200;
+let O_RDONLY = 0;
+let O_WRONLY = 1;
+let O_RDWR = 2;
+
+fn open(path, flags) {
+    ret syscall(SYS_OPEN, path, flags, 0o644);
+}
+
+fn openx(path, flags, perm) {
+    ret syscall(SYS_OPEN, path, flags, perm);
+}
+
+fn write(fd, data, len) {
+    ret syscall(SYS_OPEN, fd, data, len);
+}
+
+fn close(fd) {
+    ret syscall(SYS_CLOSE, fd);
+}

@@ -1,0 +1,56 @@
+program := stmt* EOF
+
+stmt    := decl_stmt
+         | assign_stmt
+         | call_stmt
+         | fndecl_stmt
+         | ret_stmt
+         | import_stmt
+         | if_stmt
+
+import_stmt := 'import' (STRING_LITERAL | IDENT)
+fndecl_stmt := 'fn' IDENT '(' paramlist ')' block
+ret_stmt    := 'ret' expr EOS
+decl_stmt   := 'let' IDENT '=' expr EOS
+assign_stmt := IDENT '=' expr EOS
+if_stmt     := 'if' expr block ('elif' expr block)* ('else' block)?
+
+block := '{' stmt* '}'
+
+expr        := logor
+
+logor      := logand ('||' logand)*
+logand     := equality  ('&&' equality)*
+equality   := comparison  (('==' | '!=') comparison)*
+comparison := addition    (('<' | '>' | '<=' | '>=') addition)*
+
+addition := term (('+' | '-') term)*
+term     := unary (('*' | '/' | '%') unary)*
+unary    := '-' unary 
+          | '!' unary
+          | power
+
+power   := primary ('**' unary)*
+primary := LITERAL
+         | '(' expr ')'
+         | IDENT '(' arglist ')'`
+         | IDENT
+
+arglist   := expr (',' expr)*
+paramlist := (IDENT (',' IDENT)*)?
+
+LITERAL := FLOAT_LITERAL | INT_LITERAL | BOOL_LITERAL | STRING_LITERAL
+
+STRING_LITERAL := '"' .* '"'
+INT_LITERAL := DIGITS
+BOOL_LITERAL := 'true' | 'false'
+FLOAT_LITERAL  := DIGITS ('.' DIGITS?)?
+                | '.' DIGITS
+
+HEX_LITERAL := '0x' [0-9A-Fa-f]+
+OCT_LITERAL := '0o' [0-7]+
+BIN_LITERAL := '0b' [01]+
+
+DIGITS     := [0-9]+
+IDENT      := [a-zA-Z_] [a-zA-Z0-9_]*
+EOS        := ';'

@@ -1,0 +1,19 @@
+import file;
+import error;
+
+let name = input("Enter your name: ");
+println("Hello, ", name, "!");
+
+fn math_thing() {
+    ret 1 + 1;
+}
+
+let fd = open("name.txt", O_WRONLY + O_CREAT);
+if (fd < 0) {
+    error("couldn't open file");
+}
+
+write(fd, name, strlen(name));
+close(fd);
+
+println("Did you know 1 + 1 = ", math_thing());

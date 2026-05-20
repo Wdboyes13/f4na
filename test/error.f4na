@@ -1,0 +1,10 @@
+let SYS_EXIT = 1;
+
+fn exit(code) {
+    syscall(SYS_EXIT, code);
+}
+
+fn error(text) {
+    println("error: ", text);
+    exit(1);
+}
