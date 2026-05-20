@@ -51,6 +51,12 @@ void StmtEval::operator()(ExprStmt& e) {
     delete e.expr;
 }
 
+void StmtEval::operator()(WhileStmt& e) {
+    while (eval_expr(env, e.blk.cond).as_int()) {
+        eval_block(env, e.blk.body);
+    }
+}
+
 void eval_stmt(Environment* env, Stmt& stmt) {
     std::visit(
         StmtEval{ env },

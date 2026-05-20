@@ -37,7 +37,8 @@ enum TokenType {
     TK_IDENT,
     TK_LET,
     TK_ASSIGN,
-    TK_EOF
+    TK_EOF,
+    TK_WHILE
 };
 
 inline std::string token_name(TokenType t) {
@@ -110,6 +111,8 @@ inline std::string token_name(TokenType t) {
             return "ASSIGN";
         case TK_EOF:
             return "EOF";
+        case TK_WHILE:
+            return "WHILE";
     }
 }
 
@@ -168,8 +171,12 @@ struct Tokenizer {
         toks.push_back(tk);
     }
 
-    bool starts_with(std::string_view s) const {
-        return src.compare(pos, s.size(), s) == 0;
+    bool starts_with(std::string_view s, ssize_t n = -1) const {
+        if (n == -1) {
+            return src.compare(pos, s.size(), s) == 0;
+        } else {
+            return src.compare(pos, n, s) == 0;
+        }
     }
 
     std::string parse_idname() {
@@ -189,14 +196,16 @@ struct Tokenizer {
     }
 
     bool is_keyword() {
-        return starts_with("fn") ||
-               starts_with("ret") ||
-               starts_with("if") ||
-               starts_with("elif") ||
-               starts_with("else") ||
-               starts_with("let") ||
-               starts_with("true") ||
-               starts_with("false");
+        auto kw = [&](std::string_view s) {
+            if (!starts_with(s)) {
+                return false;
+            }
+            char next = peek(s.size());
+            return !isalnum(next) && next != '_';
+        };
+
+        return kw("fn") || kw("ret") || kw("elif") || kw("else") ||
+               kw("if") || kw("let") || kw("true") || kw("false") || kw("while");
     }
 };
 

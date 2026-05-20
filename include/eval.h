@@ -44,6 +44,7 @@ struct StmtEval {
     void operator()(IfStmt& e);
     void operator()(FnDeclStmt& e);
     void operator()(ExprStmt& e);
+    void operator()(WhileStmt& e);
 };
 
 struct ExprEval {

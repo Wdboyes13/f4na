@@ -14,6 +14,7 @@ ret_stmt    := 'ret' expr EOS
 decl_stmt   := 'let' IDENT '=' expr EOS
 assign_stmt := IDENT '=' expr EOS
 if_stmt     := 'if' expr block ('elif' expr block)* ('else' block)?
+while_stmt  := 'while' expr block 
 
 block := '{' stmt* '}'
 

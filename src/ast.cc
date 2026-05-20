@@ -2,8 +2,7 @@
 #include <stdexcept>
 
 Expr* parse_expr(Parser* p);
-
-static IfStmt parse_if(Parser* p);
+Stmt parse_stmt(Parser* p);
 
 static IfStmt parse_if(Parser* p) {
     std::vector<CondBlock> branches;
@@ -17,7 +16,6 @@ static IfStmt parse_if(Parser* p) {
 
     std::vector<Stmt> stmts;
     while (!p->at(TK_RBRACE)) {
-        extern Stmt parse_stmt(Parser*);
         stmts.push_back(parse_stmt(p));
     }
 
@@ -62,6 +60,58 @@ static IfStmt parse_if(Parser* p) {
     return IfStmt{ branches, else_body };
 }
 
+static FnDeclStmt parse_fn(Parser* p) {
+    auto ident = std::get<std::string>(p->advance().val.data);
+
+    if (!p->at(TK_LPAREN)) {
+        throw std::runtime_error("expected '(' after function name");
+    }
+    p->advance();
+
+    std::vector<std::string> args;
+    while (!p->at(TK_RPAREN)) {
+        if (p->at(TK_IDENT)) {
+            args.push_back(std::get<std::string>(p->advance().val.data));
+        } else {
+            throw std::runtime_error("expected identifier in parameter list");
+        }
+        if (p->at(TK_COMMA)) {
+            p->advance();
+        }
+    }
+    p->advance();
+
+    if (!p->at(TK_LBRACE)) {
+        throw std::runtime_error("expected '{' for function body");
+    }
+    p->advance();
+
+    std::vector<Stmt> stmts;
+    while (!p->at(TK_RBRACE)) {
+        stmts.push_back(parse_stmt(p));
+    }
+    p->advance();
+
+    return FnDeclStmt{ ident, args, Block{ stmts } };
+}
+
+static WhileStmt parse_while(Parser* p) {
+    CondBlock blk;
+    auto cond = parse_expr(p);
+    if (!p->at(TK_LBRACE)) {
+        throw std::runtime_error("expected '{' after while condition");
+    }
+    p->advance();
+
+    std::vector<Stmt> stmts;
+    while (!p->at(TK_RBRACE)) {
+        stmts.push_back(parse_stmt(p));
+    }
+
+    p->advance();
+    return WhileStmt{ CondBlock{ cond, Block{ stmts } } };
+}
+
 Stmt parse_stmt(Parser* p) {
     if (p->at(TK_LET)) {
         p->advance();
@@ -99,38 +149,11 @@ Stmt parse_stmt(Parser* p) {
 
     } else if (p->at(TK_FN)) {
         p->advance();
-        auto ident = std::get<std::string>(p->advance().val.data);
+        return parse_fn(p);
 
-        if (!p->at(TK_LPAREN)) {
-            throw std::runtime_error("expected '(' after function name");
-        }
+    } else if (p->at(TK_WHILE)) {
         p->advance();
-
-        std::vector<std::string> args;
-        while (!p->at(TK_RPAREN)) {
-            if (p->at(TK_IDENT)) {
-                args.push_back(std::get<std::string>(p->advance().val.data));
-            } else {
-                throw std::runtime_error("expected identifier in parameter list");
-            }
-            if (p->at(TK_COMMA)) {
-                p->advance();
-            }
-        }
-        p->advance();
-
-        if (!p->at(TK_LBRACE)) {
-            throw std::runtime_error("expected '{' for function body");
-        }
-        p->advance();
-
-        std::vector<Stmt> stmts;
-        while (!p->at(TK_RBRACE)) {
-            stmts.push_back(parse_stmt(p));
-        }
-        p->advance();
-
-        return FnDeclStmt{ ident, args, Block{ stmts } };
+        return parse_while(p);
 
     } else {
         auto* expr = parse_expr(p);

@@ -64,6 +64,10 @@ struct IfStmt {
     std::optional<Block> else_body;
 };
 
+struct WhileStmt {
+    CondBlock blk;
+};
+
 struct FnDeclStmt {
     std::string name;
     std::vector<std::string> args;
@@ -74,7 +78,7 @@ struct ExprStmt {
     Expr* expr;
 };
 
-struct Stmt : std::variant<LetStmt, AssignStmt, RetStmt, IfStmt, FnDeclStmt, ExprStmt> {
+struct Stmt : std::variant<LetStmt, AssignStmt, RetStmt, IfStmt, FnDeclStmt, ExprStmt, WhileStmt> {
     using variant::variant;
 };
 
