@@ -38,7 +38,13 @@ enum TokenType {
     TK_LET,
     TK_ASSIGN,
     TK_EOF,
-    TK_WHILE
+    TK_WHILE,
+    TK_BITOR,
+    TK_BITXOR,
+    TK_BITAND,
+    TK_SHL,
+    TK_SHR,
+    TK_BNOT
 };
 
 inline std::string token_name(TokenType t) {
@@ -113,6 +119,18 @@ inline std::string token_name(TokenType t) {
             return "EOF";
         case TK_WHILE:
             return "WHILE";
+        case TK_BITOR:
+            return "BITOR";
+        case TK_BITXOR:
+            return "BITXOR";
+        case TK_BITAND:
+            return "BITAND";
+        case TK_SHL:
+            return "SHL";
+        case TK_SHR:
+            return "SHR";
+        case TK_BNOT:
+            return "BNOT";
     }
 }
 

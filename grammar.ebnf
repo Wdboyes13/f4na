@@ -18,18 +18,32 @@ while_stmt  := 'while' expr block
 
 block := '{' stmt* '}'
 
-expr        := logor
+expr       := logor
 
 logor      := logand ('||' logand)*
-logand     := equality  ('&&' equality)*
-equality   := comparison  (('==' | '!=') comparison)*
-comparison := addition    (('<' | '>' | '<=' | '>=') addition)*
+logand     := bitor ('&&' bitor)*
 
-addition := term (('+' | '-') term)*
-term     := unary (('*' | '/' | '%') unary)*
-unary    := '-' unary 
-          | '!' unary
-          | power
+bitor      := bitxor ('|' bitxor)*
+bitxor     := bitand ('^' bitand)*
+bitand     := equality ('&' equality)*
+
+equality   := comparison (('==' | '!=') comparison)*
+comparison := shift (('<' | '>' | '<=' | '>=') shift)*
+shift      := addition (('<<' | '>>') addition)*
+
+addition   := term (('+' | '-') term)*
+term       := unary (('*' | '/' | '%') unary)*
+unary      := '-' unary
+             | '+' unary
+             | '!' unary
+             | '~' unary
+             | power
+
+power      := primary ('**' unary)*
+primary    := LITERAL
+             | '(' expr ')'
+             | IDENT '(' arglist ')'
+             | IDENT
 
 power   := primary ('**' unary)*
 primary := LITERAL
