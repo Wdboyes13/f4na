@@ -49,7 +49,22 @@ Value ExprEval::operator()(BinaryExpr& e) {
             return lv % rv;
         }
         case TK_PWR: {
+            return lv.pow(rv);
+        }
+        case TK_BITOR: {
+            return lv | rv;
+        }
+        case TK_BITAND: {
+            return lv & rv;
+        }
+        case TK_BITXOR: {
             return lv ^ rv;
+        }
+        case TK_SHL: {
+            return lv << rv;
+        }
+        case TK_SHR: {
+            return lv >> rv;
         }
 
             BADCASE
@@ -69,6 +84,9 @@ Value ExprEval::operator()(UnaryExpr& e) {
         }
         case TK_MIN: {
             return -val;
+        }
+        case TK_BNOT: {
+            return ~val;
         }
 
             BADCASE

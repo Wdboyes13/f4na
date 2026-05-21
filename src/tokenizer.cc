@@ -134,11 +134,23 @@ std::vector<Token> tokenize(std::string src) {
         } else if (tk.starts_with("!=")) {
             tk.advance(2);
             tk.push({ TK_NEQ });
+        } else if (cr == '|') {
+            tk.advance();
+            tk.push({ TK_BITOR });
+        } else if (cr == '&') {
+            tk.advance();
+            tk.push({ TK_BITAND });
+        } else if (cr == '^') {
+            tk.advance();
+            tk.push({ TK_BITXOR });
         } else if (cr == '>') {
             tk.advance();
             if (tk.peek() == '=') {
                 tk.advance();
                 tk.push({ TK_GE });
+            } else if (tk.peek() == '>') {
+                tk.advance();
+                tk.push({ TK_SHR });
             } else {
                 tk.push({ TK_GT });
             }
@@ -147,6 +159,9 @@ std::vector<Token> tokenize(std::string src) {
             if (tk.peek() == '=') {
                 tk.advance();
                 tk.push({ TK_LE });
+            } else if (tk.peek() == '<') {
+                tk.advance();
+                tk.push({ TK_SHL });
             } else {
                 tk.push({ TK_LT });
             }
@@ -173,6 +188,9 @@ std::vector<Token> tokenize(std::string src) {
         } else if (cr == '!') {
             tk.advance();
             tk.push({ TK_NOT });
+        } else if (cr == '~') {
+            tk.advance();
+            tk.push({ TK_BNOT });
         } else if (cr == ',') {
             tk.advance();
             tk.push({ TK_COMMA });

@@ -49,18 +49,17 @@ bool Value::as_bool() const {
 
 bool Value::is_string() const { return std::holds_alternative<std::string>(data); }
 
-void Value::ensure_nstr(const std::optional<Value>& b) const {
-    if (is_string()) {
-        throw std::runtime_error("this operation doesn't support strings");
-    }
-    if (b.has_value() && b->is_string()) {
-        throw std::runtime_error("this operation doesn't support strings");
+void Value::ensure_ntype(const std::optional<Value>& b, std::initializer_list<Type> types) const {
+    for (auto& t : types) {
+        if (type() == t || b->type() == t) {
+            throw std::runtime_error("this operation does not accept this type");
+        }
     }
 }
 
 Value Value::operator+(Value b) {
-    ensure_nstr(b);
-    auto [l, r, is_int] = coerce(*this, b);
+    ensure_ntype(b, { Type::STRING });
+    auto [l, r, is_int] = coerce<double>(*this, b);
     if (is_int) {
         return Value((long long)(l + r));
     }
@@ -68,8 +67,8 @@ Value Value::operator+(Value b) {
 }
 
 Value Value::operator-(Value b) {
-    ensure_nstr(b);
-    auto [l, r, is_int] = coerce(*this, b);
+    ensure_ntype(b, { Type::STRING });
+    auto [l, r, is_int] = coerce<double>(*this, b);
     if (is_int) {
         return Value((long long)l - r);
     }
@@ -77,8 +76,8 @@ Value Value::operator-(Value b) {
 }
 
 Value Value::operator*(Value b) {
-    ensure_nstr(b);
-    auto [l, r, is_int] = coerce(*this, b);
+    ensure_ntype(b, { Type::STRING });
+    auto [l, r, is_int] = coerce<double>(*this, b);
     if (is_int) {
         return Value((long long)l * r);
     }
@@ -86,8 +85,8 @@ Value Value::operator*(Value b) {
 }
 
 Value Value::operator/(Value b) {
-    ensure_nstr(b);
-    auto [l, r, _] = coerce(*this, b);
+    ensure_ntype(b, { Type::STRING });
+    auto [l, r, _] = coerce<double>(*this, b);
     if (r == 0.0) {
         throw std::runtime_error("division by zero");
     }
@@ -95,7 +94,7 @@ Value Value::operator/(Value b) {
 }
 
 Value Value::operator%(Value b) {
-    ensure_nstr(b);
+    ensure_ntype(b, { Type::STRING });
     if (!(this->type() == Type::INT) || !(b.type() == Type::INT)) {
         throw std::runtime_error("% requires integers");
     }
@@ -107,9 +106,9 @@ Value Value::operator%(Value b) {
     return Value(std::get<long long>(data) % std::get<long long>(b.data));
 }
 
-Value Value::operator^(Value exp) {
-    ensure_nstr(exp);
-    auto [l, r, is_int] = coerce(*this, exp);
+Value Value::pow(Value b) {
+    ensure_ntype(b, { Type::STRING });
+    auto [l, r, is_int] = coerce<double>(*this, b);
     if (is_int) {
         return Value{ (long long)std::pow(l, r) };
     }
@@ -120,10 +119,10 @@ Value Value::operator==(Value b) {
     if (this->is_string() && b.is_string()) {
         return std::get<std::string>(this->data) == std::get<std::string>(b.data);
     } else {
-        throw std::runtime_error("cannot compare string and another type");
+        throw std::runtime_error("cannot compare string and different type");
     }
 
-    auto [l, r, _] = coerce(*this, b);
+    auto [l, r, _] = coerce<double>(*this, b);
     return Value{ l == r };
 }
 
@@ -131,66 +130,95 @@ Value Value::operator!=(Value b) {
     if (this->is_string() && b.is_string()) {
         return std::get<std::string>(this->data) != std::get<std::string>(b.data);
     } else {
-        throw std::runtime_error("cannot compare string and another type");
+        throw std::runtime_error("cannot compare string and different type");
     }
 
-    auto [l, r, _] = coerce(*this, b);
+    auto [l, r, _] = coerce<double>(*this, b);
     return Value{ l != r };
 }
 
 Value Value::operator<(Value b) {
-    ensure_nstr(b);
-    auto [l, r, _] = coerce(*this, b);
+    ensure_ntype(b, { Type::STRING });
+    auto [l, r, _] = coerce<double>(*this, b);
     return Value{ l < r };
 }
 
 Value Value::operator>(Value b) {
-    ensure_nstr(b);
-    auto [l, r, _] = coerce(*this, b);
+    ensure_ntype(b, { Type::STRING });
+    auto [l, r, _] = coerce<double>(*this, b);
     return Value{ l > r };
 }
 
 Value Value::operator<=(Value b) {
-    ensure_nstr(b);
-    auto [l, r, _] = coerce(*this, b);
+    ensure_ntype(b, { Type::STRING });
+    auto [l, r, _] = coerce<double>(*this, b);
     return Value{ l <= r };
 }
 
 Value Value::operator>=(Value b) {
-    ensure_nstr(b);
-    auto [l, r, _] = coerce(*this, b);
+    ensure_ntype(b, { Type::STRING });
+    auto [l, r, _] = coerce<double>(*this, b);
     return Value{ l >= r };
 }
 
 Value Value::operator&&(Value b) {
-    ensure_nstr(b);
+    ensure_ntype(b, { Type::STRING });
     return Value{ this->as_bool() && b.as_bool() };
 }
 
 Value Value::operator||(Value b) {
-    ensure_nstr(b);
+    ensure_ntype(b, { Type::STRING });
     return Value{ this->as_bool() || b.as_bool() };
 }
 
 Value Value::operator-() {
-    ensure_nstr();
-    if (type() == Type::BOOL) {
-        throw std::runtime_error("cannot negate a bool");
-    }
+    ensure_ntype(std::nullopt, { Type::STRING, Type::BOOL });
     return Value(-as_float());
 }
 
 Value Value::operator+() {
-    ensure_nstr();
-    if (type() == Type::BOOL) {
-        throw std::runtime_error("cannot negate a bool");
-    }
+    ensure_ntype(std::nullopt, { Type::STRING, Type::BOOL });
     return Value(+as_float());
 }
 
 Value Value::operator!() {
-    ensure_nstr();
+    ensure_ntype(std::nullopt, { Type::STRING });
     return Value(!as_int());
+}
+
+Value Value::operator|(Value b) {
+    ensure_ntype(std::nullopt, { Type::FLOAT, Type::STRING });
+    auto [l, r, _] = coerce<int>(*this, b);
+    return l | r;
+}
+
+Value Value::operator^(Value b) {
+    ensure_ntype(std::nullopt, { Type::FLOAT, Type::STRING });
+    auto [l, r, _] = coerce<int>(*this, b);
+    return l ^ r;
+}
+
+Value Value::operator&(Value b) {
+    ensure_ntype(std::nullopt, { Type::FLOAT, Type::STRING });
+    auto [l, r, _] = coerce<int>(*this, b);
+    return l & r;
+}
+
+Value Value::operator<<(Value b) {
+    ensure_ntype(std::nullopt, { Type::FLOAT, Type::STRING });
+    auto [l, r, _] = coerce<int>(*this, b);
+    return l << r;
+}
+
+Value Value::operator>>(Value b) {
+    ensure_ntype(std::nullopt, { Type::FLOAT, Type::STRING });
+    auto [l, r, _] = coerce<int>(*this, b);
+    return l >> r;
+}
+
+Value Value::operator~() {
+    ensure_ntype(std::nullopt, { Type::FLOAT, Type::STRING });
+    return ~this->as_int();
 }
 
 std::ostream& operator<<(std::ostream& os, const Value& v) {
@@ -209,9 +237,4 @@ std::ostream& operator<<(std::ostream& os, const Value& v) {
             break;
     }
     return os;
-}
-
-Coerced coerce(Value a, Value b) {
-    bool both_int = a.type() == Type::INT && b.type() == Type::INT;
-    return { a.as_float(), b.as_float(), both_int };
 }
