@@ -1,5 +1,5 @@
 # TODO
 
-- Arrays
+- Comments
 - For statements
 - Custom types

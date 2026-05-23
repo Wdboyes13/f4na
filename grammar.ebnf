@@ -43,22 +43,18 @@ power      := primary ('**' unary)*
 primary    := LITERAL
              | '(' expr ')'
              | IDENT '(' arglist ')'
+             | expr ('[' expr ']')+
              | IDENT
-
-power   := primary ('**' unary)*
-primary := LITERAL
-         | '(' expr ')'
-         | IDENT '(' arglist ')'`
-         | IDENT
 
 arglist   := expr (',' expr)*
 paramlist := (IDENT (',' IDENT)*)?
 
-LITERAL := FLOAT_LITERAL | INT_LITERAL | BOOL_LITERAL | STRING_LITERAL
+LITERAL := FLOAT_LITERAL | INT_LITERAL | BOOL_LITERAL | STRING_LITERAL | ARRAY_LITERAL
 
 STRING_LITERAL := '"' .* '"'
 INT_LITERAL := DIGITS
 BOOL_LITERAL := 'true' | 'false'
+ARRAY_LITERAL := '{' expr* '}'
 FLOAT_LITERAL  := DIGITS ('.' DIGITS?)?
                 | '.' DIGITS
 

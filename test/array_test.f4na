@@ -1,0 +1,24 @@
+let my_array = {1, 2, 3, "hello"};
+
+println(my_array);
+
+my_array = my_array + 10;
+println(my_array);
+
+println(my_array[2]);
+
+fn arrayfn(x, n) {
+    let arr = {};
+    let exp = 1;
+    while (n > 0) {
+        arr = arr + (x ** exp);
+        exp = exp + 1;
+        n = n - 1;
+    }
+    ret arr;
+}
+
+println(arrayfn(2, 3)[1]);
+
+let exparr = arrayfn(3, 5);
+println(exparr);

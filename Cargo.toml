@@ -1,0 +1,11 @@
+[package]
+name = "f4na"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.102"
+clap = { version = "4.6.1", features = ["derive"] }
+libc = "0.2.186"
+thiserror = "2.0.18"
+usr_input = "0.1.1"
