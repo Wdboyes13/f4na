@@ -1,4 +1,4 @@
-# F4NA (Sodium Tetrachloride)
+# F4NA (Sodium Tetraflouride)
 A new and simple programming language.
 
 ## License
