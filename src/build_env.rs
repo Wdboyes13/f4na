@@ -106,7 +106,7 @@ macro_rules! mkbpair {
 }
 
 pub fn build_env() -> Option<Environment> {
-    let mut env = Environment::new();
+    let mut env = Environment::default();
 
     env.bfnlut.extend([
         mkbpair!("print", -1, c_print),

@@ -18,20 +18,11 @@ pub struct UserFn {
     pub vars: VarLUT,
 }
 
+#[derive(Default)]
 pub struct Environment {
     pub vars: VarLUT,
     pub bfnlut: BuiltinLUT,
     pub ufnlut: UserFnLUT,
-}
-
-impl Environment {
-    pub fn new() -> Self {
-        Self {
-            vars: VarLUT::new(),
-            bfnlut: BuiltinLUT::new(),
-            ufnlut: UserFnLUT::new(),
-        }
-    }
 }
 
 pub type ResValue = Result<Value, RuntimeError>;

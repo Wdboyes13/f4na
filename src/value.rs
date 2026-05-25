@@ -292,7 +292,7 @@ impl Display for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Value::Int(_) => write!(f, "{}", self.as_int()),
-            Value::Float(_) => write!(f, "{:?}", self.as_float()),
+            Value::Float(_) => write!(f, "{}", self.as_float()),
             Value::Bool(_) => write!(f, "{}", self.as_bool()),
             Value::String(s) => write!(f, "{}", *s),
             Value::Array(a) => {

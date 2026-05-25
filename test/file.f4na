@@ -19,7 +19,7 @@ fn openx(path, flags, perm) {
 }
 
 fn write(fd, data, len) {
-    ret syscall(SYS_OPEN, fd, data, len);
+    ret syscall(SYS_WRITE, fd, data, len);
 }
 
 fn close(fd) {

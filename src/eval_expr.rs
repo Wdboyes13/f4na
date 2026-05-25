@@ -42,7 +42,7 @@ fn eval_unary(env: &mut Environment, e: &Expr) -> ResValue {
 
         match op {
             Token::Not => !val,
-            Token::Add => -val,
+            Token::Min => -val,
             Token::Bnot => val.bitwise_not(),
             _ => panic!("bad expression"),
         }
@@ -80,8 +80,8 @@ fn eval_call(env: &mut Environment, e: &Expr) -> ResValue {
             let svars = env.vars.clone();
             env.vars = fnc.vars.clone();
 
-            for i in 0..args.len() {
-                env.vars.insert(fnc.args[i].to_string(), args[i].clone());
+            for (i, arg) in args.iter().enumerate() {
+                env.vars.insert(fnc.args[i].to_string(), arg.clone());
             }
 
             if let Err(RuntimeError::Return(v)) = eval_block(env, &fnc.body.clone()) {
@@ -135,6 +135,9 @@ fn eval_index(env: &mut Environment, e: &Expr) -> ResValue {
         if let Ok(Value::Array(a)) = eval_expr(env, expr) {
             let idx = eval_expr(env, idx)?;
             if let Value::Int(idx) = idx {
+                if a.len() - 1 < idx as usize {
+                    return Err(RuntimeError::IndexOutOfBounds);
+                }
                 Ok(a[idx as usize].clone())
             } else {
                 panic!("cannot index array with non-int type");
