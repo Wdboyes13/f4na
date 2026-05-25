@@ -13,7 +13,11 @@ if (fd < 0) {
     error("couldn't open file");
 }
 
+/*
+hello this is a test block comment
+*/
+
 write(fd, name, strlen(name));
 close(fd);
 
-println("Did you know 1 + 1 = ", math_thing());
+println("Did you know 1 + 1 = ", math_thing()); // test line cmnt

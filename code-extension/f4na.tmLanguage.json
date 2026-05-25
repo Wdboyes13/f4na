@@ -2,6 +2,7 @@
   "name": "f4na",
   "scopeName": "source.f4na",
   "patterns": [
+    { "include": "#comments" },
     { "include": "#keywords" },
     { "include": "#literals" },
     { "include": "#function-def" },
@@ -10,6 +11,19 @@
     { "include": "#identifiers" }
   ],
   "repository": {
+    "comments": {
+        "patterns": [
+            {
+                "name": "comment.line.double-slash.f4na",
+                "match": "//.*$"
+            },
+            {
+                "name": "comment.block.f4na",
+                "begin": "/\\*",
+                "end": "\\*/"
+            }
+        ]
+    },
     "keywords": {
       "patterns": [
         {

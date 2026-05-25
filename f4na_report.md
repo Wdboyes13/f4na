@@ -4,14 +4,12 @@ Generated with Anthropic Claude Haiku 4.5 via GitHub Copilot
 ## 1. FEATURES TO ADD
 
 ### Language Features
-- **Comments** - Support for single-line (`//`) and/or multi-line (`/* */`) comments
-- **For Loops** - Already in grammar but not implemented in parser/evaluator
+- **For Loops**
   - Syntax: `for` (init; condition; increment) { body }
   - Or: `for` (x in array) { body } (iterator style)
 - **Break and Continue** - Flow control for loops
 - **Switch/Match Statements** - For multi-way branching
 - **Do-While Loops** - Post-test loops
-- **String Interpolation** - Instead of requiring `"text" + var + "more"`, support `"text {var} more"`
 
 ### Type System
 - **Type Annotations** - Optional static typing: `let x: int = 5;`

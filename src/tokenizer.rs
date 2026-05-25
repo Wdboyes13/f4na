@@ -347,7 +347,23 @@ pub fn tokenize(src: String) -> Result<Vec<Token>, LexerError> {
             }
         } else if cr == '/' {
             tk.advance();
-            tk.push(Token::Div);
+            if tk.peek() == '/' {
+                while !tk.at_end() && tk.peek() != '\n' {
+                    tk.advance();
+                }
+                if !tk.at_end() {
+                    tk.advance();
+                }
+            } else if tk.peek() == '*' {
+                while !tk.at_end() && !tk.starts_with("*/") {
+                    tk.advance();
+                }
+                if !tk.at_end() {
+                    tk.advance_n(2);
+                }
+            } else {
+                tk.push(Token::Div);
+            }
         } else if cr == '%' {
             tk.advance();
             tk.push(Token::Mod);

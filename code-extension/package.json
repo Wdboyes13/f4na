@@ -2,7 +2,7 @@
     "name": "f4na-vsc",
     "displayName": "F4Na",
     "description": "f4na support for vscode",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "repository": "https://github.com/Wdboyes13/f4na",
     "engines": {
         "vscode": "^1.120.0"
