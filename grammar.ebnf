@@ -7,6 +7,7 @@ stmt    := decl_stmt
          | ret_stmt
          | import_stmt
          | if_stmt
+         | for_stmt
 
 import_stmt := 'import' (STRING_LITERAL | IDENT)
 fndecl_stmt := 'fn' IDENT '(' paramlist ')' block
@@ -15,6 +16,7 @@ decl_stmt   := 'let' IDENT '=' expr EOS
 assign_stmt := IDENT '=' expr EOS
 if_stmt     := 'if' expr block ('elif' expr block)* ('else' block)?
 while_stmt  := 'while' expr block 
+for_stmt    := 'for' ((IDENT 'in' expr)|('(' (decl_stmt|assign_stmt) EOS expr EOS stmt ')')) block
 
 block := '{' stmt* '}'
 

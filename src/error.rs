@@ -16,14 +16,16 @@ pub enum LexerError {
 
 #[derive(Debug, Error)]
 pub enum ParserError {
-    #[error("unexpected token")]
-    UnexpectedToken,
+    #[error("unexpected token: expected {expected}, got {got}")]
+    UnexpectedToken { expected: Token, got: Token },
     #[error("expected token: {0}")]
     ExpectedToken(Token),
     #[error("unknown statement")]
     UnexpectedStatement,
     #[error("expected identifier")]
     ExpectedIdent,
+    #[error("unknown statement or expression")]
+    UnknownExpr
 }
 
 #[derive(Debug, Error)]

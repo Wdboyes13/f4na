@@ -4,9 +4,6 @@ Generated with Anthropic Claude Haiku 4.5 via GitHub Copilot
 ## 1. FEATURES TO ADD
 
 ### Language Features
-- **For Loops**
-  - Syntax: `for` (init; condition; increment) { body }
-  - Or: `for` (x in array) { body } (iterator style)
 - **Break and Continue** - Flow control for loops
 - **Switch/Match Statements** - For multi-way branching
 - **Do-While Loops** - Post-test loops

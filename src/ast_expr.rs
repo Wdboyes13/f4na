@@ -263,7 +263,7 @@ fn parse_literal(p: &mut Parser) -> ResultExpr {
             val: Value::Bool(b),
         })
     } else {
-        Err(ParserError::UnexpectedToken)
+        Err(ParserError::UnknownExpr)
     }
 }
 

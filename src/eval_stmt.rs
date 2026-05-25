@@ -1,119 +1,139 @@
-use crate::ast::Block;
-use crate::ast::Stmt;
-use crate::build_env;
+use crate::ast::*;
 use crate::eval::*;
 use crate::eval_expr::eval_expr;
 
-fn eval_let(env: &mut Environment, stmt: &Stmt) -> ResVoid {
-    if let Stmt::Let { name, expr } = stmt {
-        let val = eval_expr(env, expr)?;
-        env.vars.insert(name.clone(), val);
+fn eval_let(env: &mut Environment, stmt: &LetStmt) -> ResVoid {
+    let val = eval_expr(env, &stmt.expr)?;
+    env.vars.insert(stmt.name.clone(), val);
+    Ok(())
+}
+
+fn eval_assign(env: &mut Environment, stmt: &AssignStmt) -> ResVoid {
+    let val = eval_expr(env, &stmt.expr)?;
+    if env.vars.contains_key(&stmt.name) {
+        match env.vars.get_mut(&stmt.name) {
+            Some(v) => *v = val,
+            None => panic!("shouldn't reach this line"),
+        };
+
         Ok(())
     } else {
-        panic!("bad statement");
+        Err(RuntimeError::UnknownIdent(stmt.name.clone()))
     }
 }
 
-fn eval_assign(env: &mut Environment, stmt: &Stmt) -> ResVoid {
-    if let Stmt::Assign { name, expr } = stmt {
-        let val = eval_expr(env, expr)?;
-        if env.vars.contains_key(name) {
-            match env.vars.get_mut(name) {
-                Some(v) => *v = val,
-                None => panic!("shouldn't reach this line"),
-            };
+fn eval_ret(env: &mut Environment, stmt: &RetStmt) -> ResVoid {
+    Err(RuntimeError::Return(eval_expr(env, &stmt.expr)?))
+}
 
-            Ok(())
-        } else {
-            Err(RuntimeError::UnknownIdent(name.clone()))
+fn eval_if(env: &mut Environment, stmt: &IfStmt) -> ResVoid {
+    for branch in &stmt.branches {
+        if eval_expr(env, &branch.cond)?.as_bool() {
+            return eval_block(env, &branch.body);
         }
+    }
+
+    if let Some(else_body) = &stmt.else_body {
+        eval_block(env, else_body)
     } else {
-        panic!("bad statement");
+        Ok(())
     }
 }
 
-fn eval_ret(env: &mut Environment, stmt: &Stmt) -> ResVoid {
-    if let Stmt::Ret { expr } = stmt {
-        Err(RuntimeError::Return(eval_expr(env, expr)?))
-    } else {
-        panic!("bad statement");
-    }
+fn eval_fndecl(env: &mut Environment, stmt: &FnDeclStmt) -> ResVoid {
+    env.ufnlut.insert(
+        stmt.name.clone(),
+        UserFn {
+            args: stmt.args.clone(),
+            body: stmt.body.clone(),
+            vars: env.vars.clone(),
+        },
+    );
+    Ok(())
 }
 
-fn eval_if(env: &mut Environment, stmt: &Stmt) -> ResVoid {
-    if let Stmt::If {
-        branches,
-        else_body,
-    } = stmt
-    {
-        for branch in branches {
-            if eval_expr(env, &branch.cond)?.as_bool() {
-                return eval_block(env, &branch.body);
+fn eval_exprstmt(env: &mut Environment, stmt: &ExprStmt) -> ResVoid {
+    eval_expr(env, &stmt.expr)?;
+    Ok(())
+}
+
+fn eval_while(env: &mut Environment, stmt: &WhileStmt) -> ResVoid {
+    while eval_expr(env, &stmt.block.cond)?.as_bool() {
+            eval_block(env, &stmt.block.body)?;
+    }
+    Ok(())
+
+}
+
+fn eval_forin(env: &mut Environment, stmt: &ForInStmt) -> ResVoid {
+    let rhs = eval_expr(env, &stmt.rhs)?; 
+    if let Expr::Ident{ident} = stmt.lhs.clone() {
+        let mut old_val: Option<Value> = None;
+        if env.vars.contains_key(&ident) {
+            old_val = Some(env.vars[&ident].clone());
+        }
+        match rhs {
+            Value::Int(i) => {
+                for x in 0i64..i {
+                    env.vars.insert(ident.clone(), Value::Int(x));
+                    eval_block(env, &stmt.block)?;
+                }
+            },
+            Value::Array(a) => {
+                for x in a {
+                    env.vars.insert(ident.clone(), x);
+                    eval_block(env, &stmt.block)?;
+                }
+            },
+            Value::Bool(_) => {
+                return Err(RuntimeError::TypeError("cannot use bool for 'for in'".to_string()));
+            },
+            Value::String(s) => {
+                for c in s.chars() {
+                    env.vars.insert(ident.clone(), Value::String(c.to_string()));
+                    eval_block(env, &stmt.block)?;
+                }
+            },
+            Value::Float(f) => {
+                for x in 0i64..(f as i64) {
+                    env.vars.insert(ident.clone(), Value::Float(x as f64));
+                    eval_block(env, &stmt.block)?;
+                }
             }
         }
-
-        if else_body.is_some() {
-            eval_block(env, else_body.as_ref().unwrap())
+        if let Some(val) = old_val {
+            env.vars.insert(ident, val);
         } else {
-            Ok(())
-        }
-    } else {
-        panic!("bad statement");
-    }
-}
-
-fn eval_fndecl(env: &mut Environment, stmt: &Stmt) -> ResVoid {
-    if let Stmt::FnDecl { name, args, body } = stmt {
-        env.ufnlut.insert(
-            name.clone(),
-            UserFn {
-                args: args.clone(),
-                body: body.clone(),
-                vars: env.vars.clone(),
-            },
-        );
-        Ok(())
-    } else {
-        panic!("bad statement");
-    }
-}
-
-fn eval_exprstmt(env: &mut Environment, stmt: &Stmt) -> ResVoid {
-    if let Stmt::Expr { expr } = stmt {
-        eval_expr(env, expr)?;
-        Ok(())
-    } else {
-        panic!("bad statement");
-    }
-}
-
-fn eval_while(env: &mut Environment, stmt: &Stmt) -> ResVoid {
-    if let Stmt::While { block } = stmt {
-        while eval_expr(env, &block.cond)?.as_bool() {
-            eval_block(env, &block.body)?;
+            env.vars.remove(&ident);
         }
         Ok(())
     } else {
-        panic!("bad statement");
+        Err(RuntimeError::TypeError("expected identifier for 'for in'".to_string()))
     }
 }
 
-fn eval_stmt(env: &mut Environment, stmt: &Stmt) -> ResVoid {
+fn eval_foricm(env: &mut Environment, stmt: &ForICMStmt) -> ResVoid {
+    eval_stmt(env, &stmt.init)?;
+
+    while eval_expr(env, &stmt.cond)?.as_bool() {
+        eval_block(env, &stmt.block)?;
+        eval_stmt(env, &stmt.fmod)?;
+    }
+
+    Ok(())
+}
+
+pub fn eval_stmt(env: &mut Environment, stmt: &Stmt) -> ResVoid {
     match stmt {
-        Stmt::Let { name: _, expr: _ } => eval_let(env, stmt),
-        Stmt::Assign { name: _, expr: _ } => eval_assign(env, stmt),
-        Stmt::Ret { expr: _ } => eval_ret(env, stmt),
-        Stmt::If {
-            branches: _,
-            else_body: _,
-        } => eval_if(env, stmt),
-        Stmt::While { block: _ } => eval_while(env, stmt),
-        Stmt::FnDecl {
-            name: _,
-            args: _,
-            body: _,
-        } => eval_fndecl(env, stmt),
-        Stmt::Expr { expr: _ } => eval_exprstmt(env, stmt),
+        Stmt::Let(stmt) => eval_let(env, stmt),
+        Stmt::Assign(stmt) => eval_assign(env, stmt),
+        Stmt::Ret(stmt) => eval_ret(env, stmt),
+        Stmt::If(stmt) => eval_if(env, stmt),
+        Stmt::While(stmt) => eval_while(env, stmt),
+        Stmt::FnDecl(stmt) => eval_fndecl(env, stmt),
+        Stmt::Expr(stmt) => eval_exprstmt(env, stmt),
+        Stmt::ForIn(stmt) => eval_forin(env, stmt),
+        Stmt::ForICM(stmt) => eval_foricm(env, stmt)
     }
 }
 
@@ -122,13 +142,5 @@ pub fn eval_block(env: &mut Environment, blk: &Block) -> ResVoid {
         eval_stmt(env, stmt)?;
     }
 
-    Ok(())
-}
-
-pub fn eval(prog: Vec<Stmt>) -> ResVoid {
-    let mut env = build_env::build_env().unwrap();
-    for stmt in prog {
-        eval_stmt(&mut env, &stmt)?;
-    }
     Ok(())
 }

@@ -12,7 +12,7 @@ pub mod value;
 use clap::Parser;
 use std::fs::read_to_string;
 
-use crate::{ast::parse, eval_stmt::eval, tokenizer::tokenize};
+use crate::{ast::parse, eval::eval, tokenizer::tokenize};
 
 #[derive(Parser)]
 struct Cli {

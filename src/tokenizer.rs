@@ -42,6 +42,8 @@ pub enum Token {
     Assign,
     Eos,
     Eof,
+    For,
+    In,
 
     Int(i64),
     Float(f64),
@@ -159,6 +161,8 @@ impl Tokenizer {
             || kw("true")
             || kw("false")
             || kw("while")
+            || kw("for")
+            || kw("in")
     }
 
     fn is_ident(&self) -> bool {
@@ -269,6 +273,12 @@ pub fn tokenize(src: String) -> Result<Vec<Token>, LexerError> {
             } else if tk.starts_with("while") {
                 tk.advance_n(5);
                 tk.push(Token::While);
+            } else if tk.starts_with("for") {
+                tk.advance_n(3);
+                tk.push(Token::For);
+            } else if tk.starts_with("in") {
+                tk.advance_n(2);
+                tk.push(Token::In);
             }
         } else if cr == '(' {
             tk.advance();

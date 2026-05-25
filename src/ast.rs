@@ -41,38 +41,77 @@ pub struct CondBlock {
 }
 
 #[derive(Clone)]
+pub struct  LetStmt {
+    pub name: String,
+    pub expr: Expr
+}
+
+#[derive(Clone)]
+pub struct  AssignStmt {
+    pub name: String,
+    pub expr: Expr
+}
+
+#[derive(Clone)]
+pub struct  RetStmt {
+    pub expr: Expr
+}
+
+#[derive(Clone)]
+pub struct  IfStmt {
+    pub branches: Vec<CondBlock>,
+    pub else_body: Option<Block>,
+}
+
+#[derive(Clone)]
+pub struct  WhileStmt {
+    pub block: CondBlock
+}
+
+#[derive(Clone)]
+pub struct  FnDeclStmt {
+    pub name: String,
+    pub args: Vec<String>,
+    pub body: Block,
+}
+
+#[derive(Clone)]
+pub struct  ExprStmt {
+    pub expr: Expr,
+}
+
+#[derive(Clone)]
+pub struct  ForInStmt {
+    pub lhs: Expr,
+    pub rhs: Expr,
+    pub block: Block
+}
+
+#[derive(Clone)]
+pub struct  ForICMStmt {
+    pub init: Box<Stmt>,
+    pub cond: Expr,
+    pub fmod: Box<Stmt>,
+    pub block: Block
+}
+
+#[derive(Clone)]
 pub enum Stmt {
-    Let {
-        name: String,
-        expr: Expr,
-    },
-    Assign {
-        name: String,
-        expr: Expr,
-    },
-    Ret {
-        expr: Expr,
-    },
-    If {
-        branches: Vec<CondBlock>,
-        else_body: Option<Block>,
-    },
-    While {
-        block: CondBlock,
-    },
-    FnDecl {
-        name: String,
-        args: Vec<String>,
-        body: Block,
-    },
-    Expr {
-        expr: Expr,
-    },
+    Assign(AssignStmt),
+    Let(LetStmt),
+    Ret(RetStmt),
+    If(IfStmt),
+    While(WhileStmt),
+    FnDecl(FnDeclStmt),
+    Expr(ExprStmt),
+    ForIn(ForInStmt),
+    ForICM(ForICMStmt) // init; cond; mod
 }
 
 pub struct Parser {
     pub tokens: Vec<Token>,
     pub pos: usize,
+    use_eos: bool
 }
 
 impl Parser {
@@ -117,15 +156,27 @@ impl Parser {
     }
 
     pub fn expect(&mut self, t: Token) -> Result<Token, ParserError> {
-        if !self.at(t) {
-            Err(ParserError::UnexpectedToken)
+        if !self.at(t.clone()) {
+            Err(ParserError::UnexpectedToken{expected: t, got: self.peek()})
         } else {
             Ok(self.advance())
         }
     }
 
+    pub fn enable_eos(&mut self, yes: bool) {
+        self.use_eos = yes;
+    }
+
+    pub fn ensure_eos(&mut self) -> Result<Token, ParserError> {
+        if self.use_eos {
+            self.expect(Token::Eos)
+        } else {
+            Ok(Token::Eos)
+        }
+    }
+
     fn new(tokens: Vec<Token>) -> Self {
-        Self { tokens, pos: 0 }
+        Self { tokens, pos: 0, use_eos: true }
     }
 }
 

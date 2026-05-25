@@ -28,7 +28,7 @@
       "patterns": [
         {
           "name": "keyword.control.f4na",
-          "match": "\\b(if|elif|else|while|ret|import)\\b"
+          "match": "\\b(if|elif|else|while|ret|import|for)\\b"
         },
         {
           "name": "keyword.declaration.f4na",
