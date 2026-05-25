@@ -84,11 +84,19 @@ fn eval_call(env: &mut Environment, e: &Expr) -> ResValue {
                 env.vars.insert(fnc.args[i].to_string(), arg.clone());
             }
 
-            if let Err(RuntimeError::Return(v)) = eval_block(env, &fnc.body.clone()) {
-                env.vars = svars;
-                Ok(v)
-            } else {
-                Ok(Value::Int(0))
+            match eval_block(env, &fnc.body.clone()) {
+                Err(RuntimeError::Return(v)) => {
+                    env.vars = svars;
+                    Ok(v)
+                }
+                Err(e) => {
+                    env.vars = svars;
+                    Err(e)
+                }
+                Ok(_) => {
+                    env.vars = svars;
+                    Ok(Value::Int(0))
+                }
             }
         } else {
             Err(RuntimeError::UnknownFunction(ident.to_string()))

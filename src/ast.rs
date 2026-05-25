@@ -105,7 +105,9 @@ pub enum Stmt {
     FnDecl(FnDeclStmt),
     Expr(ExprStmt),
     ForIn(ForInStmt),
-    ForICM(ForICMStmt) // init; cond; mod
+    ForICM(ForICMStmt), // init; cond; mod
+    Continue,
+    Break
 }
 
 pub struct Parser {

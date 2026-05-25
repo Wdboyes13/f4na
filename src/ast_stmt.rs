@@ -159,6 +159,14 @@ pub fn parse_stmt(p: &mut Parser) -> Result<Stmt, ParserError> {
     } else if p.at(Token::For) {
         p.advance();
         parse_for(p)
+    } else if p.at(Token::Continue) {
+        p.advance();
+        p.ensure_eos()?;
+        Ok(Stmt::Continue)
+    } else if p.at(Token::Break) {
+        p.advance();
+        p.ensure_eos()?;
+        Ok(Stmt::Break)
     } else {
         let expr = parse_expr(p)?;
         p.ensure_eos()?;

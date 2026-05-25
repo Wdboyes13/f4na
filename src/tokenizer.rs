@@ -44,6 +44,8 @@ pub enum Token {
     Eof,
     For,
     In,
+    Continue,
+    Break,
 
     Int(i64),
     Float(f64),
@@ -163,6 +165,8 @@ impl Tokenizer {
             || kw("while")
             || kw("for")
             || kw("in")
+            || kw("break")
+            || kw("continue")
     }
 
     fn is_ident(&self) -> bool {
@@ -279,6 +283,12 @@ pub fn tokenize(src: String) -> Result<Vec<Token>, LexerError> {
             } else if tk.starts_with("in") {
                 tk.advance_n(2);
                 tk.push(Token::In);
+            } else if tk.starts_with("break") {
+                tk.advance_n(5);
+                tk.push(Token::Break);
+            } else if tk.starts_with("continue") {
+                tk.advance_n(8);
+                tk.push(Token::Continue);
             }
         } else if cr == '(' {
             tk.advance();

@@ -57,12 +57,29 @@ fn eval_exprstmt(env: &mut Environment, stmt: &ExprStmt) -> ResVoid {
     Ok(())
 }
 
+macro_rules! eval_inloop {
+    ($env:ident, $block:tt) => {
+        if let Err(e) = eval_block($env, &$block) {
+            match e {
+                RuntimeError::BreakStmt => {
+                    break;
+                },
+                RuntimeError::ContinueStmt => {
+                    continue;
+                },
+                _ => {
+                    return Err(e)
+                }
+            }
+        }
+    }
+}
+
 fn eval_while(env: &mut Environment, stmt: &WhileStmt) -> ResVoid {
     while eval_expr(env, &stmt.block.cond)?.as_bool() {
-            eval_block(env, &stmt.block.body)?;
+        eval_inloop!(env, (stmt.block.body));
     }
     Ok(())
-
 }
 
 fn eval_forin(env: &mut Environment, stmt: &ForInStmt) -> ResVoid {
@@ -76,13 +93,13 @@ fn eval_forin(env: &mut Environment, stmt: &ForInStmt) -> ResVoid {
             Value::Int(i) => {
                 for x in 0i64..i {
                     env.vars.insert(ident.clone(), Value::Int(x));
-                    eval_block(env, &stmt.block)?;
+                    eval_inloop!(env, (stmt.block));
                 }
             },
             Value::Array(a) => {
                 for x in a {
                     env.vars.insert(ident.clone(), x);
-                    eval_block(env, &stmt.block)?;
+                    eval_inloop!(env, (stmt.block));
                 }
             },
             Value::Bool(_) => {
@@ -91,13 +108,13 @@ fn eval_forin(env: &mut Environment, stmt: &ForInStmt) -> ResVoid {
             Value::String(s) => {
                 for c in s.chars() {
                     env.vars.insert(ident.clone(), Value::String(c.to_string()));
-                    eval_block(env, &stmt.block)?;
+                    eval_inloop!(env, (stmt.block));
                 }
             },
             Value::Float(f) => {
                 for x in 0i64..(f as i64) {
                     env.vars.insert(ident.clone(), Value::Float(x as f64));
-                    eval_block(env, &stmt.block)?;
+                    eval_inloop!(env, (stmt.block));
                 }
             }
         }
@@ -116,7 +133,7 @@ fn eval_foricm(env: &mut Environment, stmt: &ForICMStmt) -> ResVoid {
     eval_stmt(env, &stmt.init)?;
 
     while eval_expr(env, &stmt.cond)?.as_bool() {
-        eval_block(env, &stmt.block)?;
+        eval_inloop!(env, (stmt.block));
         eval_stmt(env, &stmt.fmod)?;
     }
 
@@ -133,7 +150,9 @@ pub fn eval_stmt(env: &mut Environment, stmt: &Stmt) -> ResVoid {
         Stmt::FnDecl(stmt) => eval_fndecl(env, stmt),
         Stmt::Expr(stmt) => eval_exprstmt(env, stmt),
         Stmt::ForIn(stmt) => eval_forin(env, stmt),
-        Stmt::ForICM(stmt) => eval_foricm(env, stmt)
+        Stmt::ForICM(stmt) => eval_foricm(env, stmt),
+        Stmt::Break => Err(RuntimeError::BreakStmt),
+        Stmt::Continue => Err(RuntimeError::ContinueStmt)
     }
 }
 

@@ -44,4 +44,8 @@ pub enum RuntimeError {
     NotAnArray,
     #[error("not an error, a return statement was called")]
     Return(Value),
+    #[error("not an error, a break statement was called")]
+    BreakStmt,
+    #[error("not an error, a continue statement was called")]
+    ContinueStmt
 }

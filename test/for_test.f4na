@@ -18,3 +18,27 @@ for (let x = 0; x < 10; x = x + 1) {
     print(" ");
 }
 println("");
+
+fn is_even(x) {
+    ret (x % 2 == 0);
+}
+
+println("break test");
+for (let x = 0; x < 10; x = x + 1) {
+    print(x);
+    print(" ");
+    if x >= 5 {
+        break;
+    }
+}
+println("");
+
+println("continue test");
+for x in 10 {
+    print(x);
+    if is_even(x) {
+        continue;
+    }
+    print(" ");
+}
+println("");
