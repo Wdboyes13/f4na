@@ -1,0 +1,103 @@
+{
+  "name": "f4na",
+  "scopeName": "source.f4na",
+  "patterns": [
+    { "include": "#keywords" },
+    { "include": "#literals" },
+    { "include": "#function-def" },
+    { "include": "#function-call" },
+    { "include": "#operators" },
+    { "include": "#identifiers" }
+  ],
+  "repository": {
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.f4na",
+          "match": "\\b(if|elif|else|while|ret|import)\\b"
+        },
+        {
+          "name": "keyword.declaration.f4na",
+          "match": "\\b(let|fn)\\b"
+        },
+        {
+          "name": "constant.language.boolean.f4na",
+          "match": "\\b(true|false)\\b"
+        }
+      ]
+    },
+    "literals": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.f4na",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            { "name": "constant.character.escape.f4na", "match": "\\\\." }
+          ]
+        },
+        {
+          "name": "constant.numeric.hex.f4na",
+          "match": "\\b0x[0-9A-Fa-f]+\\b"
+        },
+        {
+          "name": "constant.numeric.octal.f4na",
+          "match": "\\b0o[0-7]+\\b"
+        },
+        {
+          "name": "constant.numeric.binary.f4na",
+          "match": "\\b0b[01]+\\b"
+        },
+        {
+          "name": "constant.numeric.float.f4na",
+          "match": "\\b[0-9]+(?:\\.[0-9]*)?\\b|\\.[0-9]+\\b"
+        },
+        {
+          "name": "constant.numeric.integer.f4na",
+          "match": "\\b[0-9]+\\b"
+        }
+      ]
+    },
+    "function-def": {
+      "match": "\\b(fn)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?=\\()",
+      "captures": {
+        "1": { "name": "keyword.declaration.function.f4na" },
+        "2": { "name": "entity.name.function.f4na" }
+      }
+    },
+    "function-call": {
+      "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?=\\()",
+      "captures": {
+        "1": { "name": "entity.name.function.call.f4na" }
+      }
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.logical.f4na",
+          "match": "\\|\\||&&|!"
+        },
+        {
+          "name": "keyword.operator.bitwise.f4na",
+          "match": "\\||\\^|&|~|<<|>>"
+        },
+        {
+          "name": "keyword.operator.comparison.f4na",
+          "match": "==|!=|<=|>=|<|>"
+        },
+        {
+          "name": "keyword.operator.arithmetic.f4na",
+          "match": "\\*\\*|[+\\-*/%]"
+        },
+        {
+          "name": "keyword.operator.assignment.f4na",
+          "match": "="
+        }
+      ]
+    },
+    "identifiers": {
+      "name": "variable.other.f4na",
+      "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+    }
+  }
+}
